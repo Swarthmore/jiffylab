@@ -88,6 +88,7 @@ def simple_auth(user, passwd):
         return True
     except:
         print 'Unable to reach {0}'.format(server)
+        return False
 
 def slugify(text, delim=u'-'):
     """Generates a slightly worse ASCII-only slug."""
