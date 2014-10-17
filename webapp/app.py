@@ -81,13 +81,13 @@ def simple_auth(user, passwd):
     username = 'uid={0},ou=Users,dc=aweber,dc=com'.format(user)
     try:
         ldap = ldap.initialize(connection_string)
+        try:
+            ldap.simple_bind_s(username, passwd)
+        except ldap.INVALID_CREDENTIALS:
+            return False
+        return True
     except:
         print 'Unable to reach {0}'.format(server)
-    try:
-        ldap.simple_bind_s(username, passwd)
-    except ldap.INVALID_CREDENTIALS:
-        return False
-    return True
 
 def slugify(text, delim=u'-'):
     """Generates a slightly worse ASCII-only slug."""
