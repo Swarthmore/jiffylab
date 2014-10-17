@@ -16,6 +16,8 @@ from flask.ext.wtf import Form, TextField
 import psutil
 import requests
 
+import ldap
+
 app = Flask(__name__)
 
 app.config['BOOTSTRAP_USE_MINIFIED'] = True
@@ -57,17 +59,35 @@ class ContainerException(Exception):
 class UserForm(Form):
     # TODO use HTML5 email input
     email = TextField('Email', description='Please enter your email address.')
+    passwd = TextField('Password', description='Please enter your LDAP password.')
 
 
 @app.before_request
 def get_current_user():
     g.user = None
+    g.passwd = None
     email = session.get('email')
-    if email is not None:
+    passwd = session.get('passwd')
+    if email is not None and passwd is not None:
         g.user = email
+        g.passwd = passwd
 
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
+def simple_auth(user, passwd):
+    server = 'ldapmaster.colo.lair'
+    port = 636
+    connection_string = 'ldaps://{0}:{1}'.format(server,port)
+    username = 'uid={0},ou=Users,dc=aweber,dc=com'.format(user)
+    try:
+        ldap = ldap.initialize(connection_string)
+    except:
+        print 'Unable to reach {0}'.format(server)
+    try:
+        ld.simple_bind_s(username, passwd)
+    except ldap.INVALID_CREDENTIALS:
+        return False
+    return True
 
 def slugify(text, delim=u'-'):
     """Generates a slightly worse ASCII-only slug."""
@@ -231,14 +251,19 @@ def index():
     try:
         container = None
         form = UserForm()
-        print g.user
         if g.user:
             # show container:
             container = get_or_make_container(g.user)
         else:
             if form.validate_on_submit():
                 g.user = form.email.data
+                g.passwd = form.passwd.data
                 session['email'] = g.user
+                session['passwd'] = g.passwd
+                if simple_auth(session['email'], session['passwd']):
+                    print "Login Success!"
+                else:
+                    print "Login Failed!"
                 container = get_or_make_container(g.user)
         return render_template('index.html',
                 container=container,
