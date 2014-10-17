@@ -84,7 +84,7 @@ def simple_auth(user, passwd):
     except:
         print 'Unable to reach {0}'.format(server)
     try:
-        ld.simple_bind_s(username, passwd)
+        ldap.simple_bind_s(username, passwd)
     except ldap.INVALID_CREDENTIALS:
         return False
     return True
