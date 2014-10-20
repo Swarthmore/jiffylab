@@ -266,6 +266,8 @@ def index():
                     print "Login Success!"
                 else:
                     print "Login Failed!"
+                    session.pop('email', None)
+                    return render_template('error.html', error=e)
                 container = get_or_make_container(g.user)
         return render_template('index.html',
                 container=container,
