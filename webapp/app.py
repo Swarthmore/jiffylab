@@ -74,20 +74,21 @@ def get_current_user():
 
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
-def simple_auth(user, passwd):
-    server = 'ldapmaster.colo.lair'
-    port = 636
-    connection_string = 'ldaps://{0}:{1}'.format(server,port)
-    username = 'uid={0},ou=Users,dc=aweber,dc=com'.format(user)
+def ldap_auth(username, password):
+    ldap_server="localhost"
+    ldap_port=389
+    user_dn = "uid={0},ou=Users,dc=aweber,dc=com".format(username)
+    base_dn = "dc=aweber,dc=com"
+    connect = ldap.initialize("ldap://{0}:{1}".format(ldap_server, ldap_port))
+    search_filter = "uid={0}".format(username)
     try:
-        ldap = ldap.initialize(connection_string)
-        try:
-            ldap.simple_bind_s(username, passwd)
-        except ldap.INVALID_CREDENTIALS:
-            return False
+        connect.bind_s(user_dn,password)
+        print "Authentication Success"
+        connect.unbind_s()
         return True
-    except:
-        print 'Unable to reach {0}'.format(server)
+    except ldap.LDAPError:
+        connect.unbind_s()
+        print "Authentication Failed"
         return False
 
 def slugify(text, delim=u'-'):
