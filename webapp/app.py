@@ -262,7 +262,7 @@ def index():
                 g.passwd = form.passwd.data
                 session['email'] = g.user
                 session['passwd'] = g.passwd
-                if simple_auth(session['email'], session['passwd']):
+                if ldap_auth(session['email'], session['passwd']):
                     print "Login Success!"
                 else:
                     print "Login Failed!"
