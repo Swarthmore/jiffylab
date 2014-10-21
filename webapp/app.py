@@ -58,7 +58,7 @@ class ContainerException(Exception):
 
 class UserForm(Form):
     # TODO use HTML5 email input
-    email = TextField('Email', description='Please enter your email address.')
+    email = TextField('Username', description='Please enter your LDAP username.')
     passwd = TextField('Password', description='Please enter your LDAP password.')
 
 
